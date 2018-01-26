@@ -69,7 +69,16 @@ describe('Viewport', () => {
             assert.calledWith(image.clear, {top: 0, left: 0, width: 10, height: 10});
         });
 
-        it('should crop area size to a viewport origin', () => {
+        it('should crop area size to a viewport origin (inside)', () => {
+            const viewport = createViewport({coords: {top: 0, left: 0, width: 30, height: 20}, image});
+
+            const area = {top: 10, left: 5, width: 20, height: 5};
+            viewport.ignoreAreas([area]);
+
+            assert.calledWith(image.clear, area);
+        });
+
+        it('should crop area size to a viewport origin (bottom right)', () => {
             const viewport = createViewport({coords: {top: 0, left: 0, width: 30, height: 20}, image});
 
             viewport.ignoreAreas([{top: 10, left: 5, width: 30, height: 5}]);
@@ -77,13 +86,28 @@ describe('Viewport', () => {
             assert.calledWith(image.clear, {top: 10, left: 5, width: 25, height: 5});
         });
 
-        it('should not clear image if area is outside of viewport', () => {
-            sandbox.spy(image.clear);
+        it('should crop area size to a viewport origin (top left)', () => {
+            const viewport = createViewport({coords: {top: 20, left: 15, width: 30, height: 20}, image});
+
+            viewport.ignoreAreas([{top: 10, left: 5, width: 20, height: 20}]);
+
+            assert.calledWith(image.clear, {top: 0, left: 0, width: 10, height: 10});
+        });
+
+        it('should not clear image if area is outside of viewport (bottom right)', () => {
             const viewport = createViewport({coords: {top: 0, left: 0, width: 30, height: 20}, image});
 
             viewport.ignoreAreas([{top: 21, left: 31, width: 30, height: 5}]);
 
-            assert.isFalse(image.clear.called);
+            assert.notCalled(image.clear);
+        });
+
+        it('should not clear image if area is outside of viewport (top left)', () => {
+            const viewport = createViewport({coords: {top: 21, left: 31, width: 30, height: 20}, image});
+
+            viewport.ignoreAreas([{top: 0, left: 0, width: 30, height: 20}]);
+
+            assert.notCalled(image.clear);
         });
     });
 
